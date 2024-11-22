@@ -1,0 +1,26 @@
+{
+  "name": "comissions-ms",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/comissions-ms/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "comissions-ms:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "comissions-ms:build:development"
+        },
+        "production": {
+          "buildTarget": "comissions-ms:build:production"
+        }
+      }
+    }
+  }
+}

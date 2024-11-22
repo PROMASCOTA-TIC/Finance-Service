@@ -1,0 +1,26 @@
+{
+  "name": "financial-report-ms",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/financial-report-ms/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "financial-report-ms:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "financial-report-ms:build:development"
+        },
+        "production": {
+          "buildTarget": "financial-report-ms:build:production"
+        }
+      }
+    }
+  }
+}

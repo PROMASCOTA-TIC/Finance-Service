@@ -35,7 +35,14 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": ["apps/finance-service-e2e/**/*"]
+      "exclude": [
+        "apps/finance-service-e2e/**/*",
+        "apps/admin-ms-e2e/**/*",
+        "apps/income-ms-e2e/**/*",
+        "apps/comissions-ms-e2e/**/*",
+        "apps/expenses-ms-e2e/**/*",
+        "apps/financial-report-ms-e2e/**/*"
+      ]
     }
   ]
 }
