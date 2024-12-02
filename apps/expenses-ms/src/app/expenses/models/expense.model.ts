@@ -35,12 +35,24 @@ export class Expense extends Model {
     })
     price: number;
     
-    @CreatedAt
+    @Column({
+        type: DataType.DATE,  
+        allowNull: false,
+        field: 'CREATEDAT',
+    })
     createdAt: Date;
-    
-    @UpdatedAt
-    updatedAt: Date;
-    
-    @DeletedAt
-    deletedAt: Date;
+
+    @Column({
+        type:  DataType.DATE,   
+        allowNull: true,
+        field: 'UPDATEDAT',
+    })
+    updatedAt?: Date;
+
+    @Column({
+        type:  DataType.DATE, 
+        allowNull: true,
+        field: 'DELETEDAT',
+    })
+    deletedAt?: Date;
 }

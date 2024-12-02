@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { ExpensesModule } from './expenses/expenses.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Expense } from './expenses/models/expense.model';
-import { envs } from 'config';
 import { Dialect } from 'sequelize';
+import { envs } from '../config';
 
 
 @Module({
@@ -12,13 +12,15 @@ import { Dialect } from 'sequelize';
     SequelizeModule.forRoot({
       dialect: envs.dbDialect as Dialect,
       logging: console.log,
-      host: envs.dbHost,
-      port: envs.dbPort,
-      username: envs.dbUsername,
-      password: envs.dbPassword,
-      database: envs.dbName,
+      username: envs.dbExpenseUsername,
+      password: envs.dbExpensePassword,
+      synchronize: true,
+      autoLoadModels: true,
+      dialectOptions: {
+        connectString: envs.connectionString,      },
       models: [Expense],
     })
   ],
 })
 export class AppModule {}
+console.log(envs)

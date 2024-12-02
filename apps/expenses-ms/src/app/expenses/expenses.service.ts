@@ -4,6 +4,8 @@ import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { Expense } from './models/expense.model';
 import { InjectModel } from '@nestjs/sequelize';
+import { Op } from 'sequelize';
+import { GetByDateRangeDto } from './dto/get-income-by-range-';
 
 
 @Injectable()
@@ -22,49 +24,64 @@ export class ExpensesService implements OnModuleInit {
     } catch (error) {
       this.logger.error(`Failed to connect to the Oracle database: ${error.message}`)
     }
-
-    this.runMigrations();
   }
 
-  async runMigrations() {
+  async create(createExpenseDto: CreateExpenseDto) {
     try {
-      await this.expense.sequelize.sync();
-
-      this.logger.log('Migrations applied succesfully');
+      return await this.expense.create({
+        id: UuidV4(),
+        ...createExpenseDto
+      });
     } catch (error) {
-      this.logger.error('Error applying migrations:', error);
+      this.logger.error('Error creating expense:', error.message);
+      throw new Error(error.message);
     }
   }
 
-  create(createExpenseDto: CreateExpenseDto) {
-    return this.expense.create({
-      id: UuidV4(),
-      ...createExpenseDto
-    }).catch(error => { throw new Error(error.message) });
-  }
-
   async findAll() {
-    return await this.expense.findAll();
+    return await this.expense.findAll().catch((error) => {
+      this.logger.error('Error getting expenses:', error.message);
+      throw new NotFoundException('Error getting expenses:', error.message);
+    });
   }
 
   async findOne(id: string) {
     const expense = await this.expense.findByPk(id);
-    if(!expense){
+    if (!expense) {
+      this.logger.error(`Expense with id ${id} not found`);
       throw new NotFoundException(`Expense with id ${id} not found`);
     }
     return expense;
   }
 
   async update(id: string, updateExpenseDto: UpdateExpenseDto) {
-
     const { id: _, ...data } = updateExpenseDto;
-
     await this.findOne(id);
-    return this.expense.update(data, { where: { id } });
+    return this.expense.update(data, { where: { id } }).catch((error) => {
+      this.logger.error('Error updating expense:', error.message);
+      throw new Error(error.message);
+    });
   }
 
   async remove(id: string) {
     await this.findOne(id);
-    return this.expense.destroy({ where: { id } });
+    return this.expense.destroy({ where: { id } }).catch((error) => {
+      this.logger.error('Error deleting expense:', error.message);
+      throw new Error(error.message);
+    });
   }
+
+  async findByDateRange(getByDateRangeDto: GetByDateRangeDto) {
+    return await this.expense.findAll({
+      where: {
+        income_date: {
+          [Op.between]: [getByDateRangeDto.startDate, getByDateRangeDto.endDate]
+        }
+      }
+    }).catch((error) => {
+      this.logger.error('Error getting incomes:', error.message);
+      throw new NotFoundException('Error getting incomes:', error.message);
+    });
+  }
+
 }
