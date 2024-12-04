@@ -12,13 +12,6 @@ export class Income extends Model {
     id: string;  
 
     @Column({
-        type: DataType.DATE,
-        allowNull: false,
-        field: 'INCOME_DATE',
-    })
-    income_date: Date;
-
-    @Column({
         type: DataType.STRING,
         allowNull: false,
         field: 'ENTREPRENEUR_ID',
@@ -49,21 +42,21 @@ export class Income extends Model {
     @Column({
         type: DataType.DATE,  
         allowNull: false,
-        field: 'CREATEDAT',
+        field: 'CREATED_AT',
     })
     createdAt: Date;
 
     @Column({
         type:  DataType.DATE,   
         allowNull: true,
-        field: 'UPDATEDAT',
+        field: 'UPDATED_AT',
     })
     updatedAt?: Date;
 
     @Column({
         type:  DataType.DATE, 
         allowNull: true,
-        field: 'DELETEDAT',
+        field: 'DELETED_AT',
     })
     deletedAt?: Date;
 }

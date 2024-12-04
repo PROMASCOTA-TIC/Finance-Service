@@ -22,6 +22,8 @@ async function bootstrap() {
     })
   );
 
+  app.listen()
+
   Logger.log(`Income Microservice is running`,'IncomeMicroservice');
 }
 
