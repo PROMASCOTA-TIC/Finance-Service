@@ -3,7 +3,7 @@ import { v4 as UuidV4 } from 'uuid';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { Income } from './models/income.models';
 import { InjectModel } from '@nestjs/sequelize';
-import { GetByDateRangeDto } from './dto/get-income-by-range-';
+import { GetByDateRangeDto } from './dto/get-income-by-range.dto';
 import { Op } from 'sequelize';
 import { NotFoundError } from 'rxjs';
 
@@ -28,9 +28,9 @@ export class IncomesService implements OnModuleInit {
 
   async create(createIncomeDto: CreateIncomeDto) {
     //TODO: Conectar con el ms de productos para obtener la categoría del producto
-    const newIncome = { id: UuidV4(), product_category: 'Alimento' ,...createIncomeDto };
+    const newIncome = { id: UuidV4() ,product_category: 'Alimento' ,...createIncomeDto };
     try {
-      return await this.incomeModel.findByPk(newIncome.id);
+      return await this.incomeModel.create(newIncome);
     } catch (error) {
       this.logger.error('Error creating incomes:', error.message);
       throw new Error(`Error creating income: ${error.message}`);
@@ -56,7 +56,7 @@ export class IncomesService implements OnModuleInit {
   async findByDateRange(getByDateRangeDto: GetByDateRangeDto) {
     return await this.incomeModel.findAll({    
       where: {
-        income_date: {
+        CREATED_AT: {
           [Op.between]: [getByDateRangeDto.startDate, getByDateRangeDto.endDate]
         }
       }
