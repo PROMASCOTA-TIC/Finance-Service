@@ -8,51 +8,56 @@ export class Expense extends Model {
         primaryKey: true,
         allowNull: false,
         unique: true,
+        field: 'ID',
     })
     id: string;
 
     @Column({
         type: DataType.STRING,
         allowNull: false,
+        field: 'CATEGORY',
     })
     category: string;
 
     @Column({
         type: DataType.STRING,
         allowNull: false,
+        field: 'DESCRIPTION',
     })
     description: string;
 
     @Column({
         type: DataType.DATE,
         allowNull: false,
+        field: 'EXPENSE_DATE',
     })
     expenseDate: Date;
     
     @Column({
         type: DataType.NUMBER,
         allowNull: false,
+        field: 'PRICE',
     })
     price: number;
     
     @Column({
         type: DataType.DATE,  
         allowNull: false,
-        field: 'CREATEDAT',
+        field: 'CREATED_AT',
     })
     createdAt: Date;
 
     @Column({
         type:  DataType.DATE,   
         allowNull: true,
-        field: 'UPDATEDAT',
+        field: 'UPDATED_AT',
     })
     updatedAt?: Date;
 
     @Column({
         type:  DataType.DATE, 
         allowNull: true,
-        field: 'DELETEDAT',
+        field: 'DELETED_AT',
     })
     deletedAt?: Date;
 }

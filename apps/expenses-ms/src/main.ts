@@ -25,6 +25,8 @@ async function bootstrap() {
     })
   );
 
+  app.listen();
+  
   logger.log(`Expenses Microservice is running`);
 }
 

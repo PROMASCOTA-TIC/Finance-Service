@@ -11,6 +11,7 @@ export class ExpensesController {
 
   @MessagePattern('create_expense')
   create(@Payload() createExpenseDto: CreateExpenseDto) {
+    console.log('Mensaje recibido en create_expense:', createExpenseDto)
     return this.expensesService.create(createExpenseDto);
   }
 
@@ -20,7 +21,8 @@ export class ExpensesController {
   }
 
   @MessagePattern('find_one_expense')
-  findOne(@Payload('id', ParseUUIDPipe) id: string) {
+  findOne(@Payload('id') id: string) {
+    console.log('Mensaje recibido en find_one_expense:', id)
     return this.expensesService.findOne(id);
   }
 

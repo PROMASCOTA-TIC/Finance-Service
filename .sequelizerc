@@ -1,5 +1,0 @@
-const path = require('path');
-
-module.exports = {
-    "migrations-path": path.resolve('/apps/expenses-ms/src/database/migrations'),
-};
