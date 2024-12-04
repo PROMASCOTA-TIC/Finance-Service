@@ -1,6 +1,11 @@
-import { Column, CreatedAt, DataType, DeletedAt, Model, Table, UpdatedAt } from "sequelize-typescript";
+import { Column, DataType, Model, Table } from "sequelize-typescript";
 
-@Table
+@Table(
+    {
+        tableName: 'EXPENSES',
+        timestamps: true,
+    }
+)
 export class Expense extends Model {
     
     @Column({
