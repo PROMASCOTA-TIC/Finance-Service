@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, ParseUUIDPipe } from '@nestjs/common';
 import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { GetByDateRangeDto } from './dto/get-income-by-range-';
+import { GetByDateRangeDto } from './dto/get-income-by-range.dto';
 
 @Controller('expenses')
 export class ExpensesController {
@@ -19,11 +19,6 @@ export class ExpensesController {
     return this.expensesService.findAll();
   }
 
-  @MessagePattern('find_one_expense')
-  findOne(@Payload('id', ParseUUIDPipe) id: string) {
-    return this.expensesService.findOne(id);
-  }
-
   @MessagePattern('update_expense')
   update(
     @Payload() updateExpenseDto: UpdateExpenseDto
@@ -32,7 +27,7 @@ export class ExpensesController {
   }
 
   @MessagePattern('delete_expense')
-  remove(@Param('id', ParseUUIDPipe) id: string) {
+  remove(@Payload('id', ParseUUIDPipe) id: string) {
     return this.expensesService.remove(id);
   }
 

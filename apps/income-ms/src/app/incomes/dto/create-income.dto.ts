@@ -3,9 +3,6 @@ import { IsDateString, IsNumber, IsString, IsUUID, Min } from "class-validator"
 
 export class CreateIncomeDto {
 
-    @IsDateString()
-    income_date: Date
-
     @IsUUID()
     entrepreneur_id: string
 

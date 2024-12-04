@@ -1,5 +1,5 @@
 import { Type } from "class-transformer"
-import { IsDate, IsDateString, IsNumber, IsString, Min } from "class-validator"
+import { IsDateString, IsNumber, IsString, Min } from "class-validator"
 
 export class CreateExpenseDto {
 

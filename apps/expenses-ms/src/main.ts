@@ -1,4 +1,4 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
@@ -25,6 +25,8 @@ async function bootstrap() {
     })
   );
 
+  app.listen();
+  
   logger.log(`Expenses Microservice is running`);
 }
 

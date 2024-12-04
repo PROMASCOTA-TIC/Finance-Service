@@ -5,7 +5,7 @@ import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { Expense } from './models/expense.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import { GetByDateRangeDto } from './dto/get-income-by-range-';
+import { GetByDateRangeDto } from './dto/get-income-by-range.dto';
 
 
 @Injectable()
@@ -74,7 +74,7 @@ export class ExpensesService implements OnModuleInit {
   async findByDateRange(getByDateRangeDto: GetByDateRangeDto) {
     return await this.expense.findAll({
       where: {
-        income_date: {
+        EXPENSE_DATE: {
           [Op.between]: [getByDateRangeDto.startDate, getByDateRangeDto.endDate]
         }
       }
