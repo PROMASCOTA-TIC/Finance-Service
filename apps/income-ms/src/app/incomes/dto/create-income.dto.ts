@@ -4,10 +4,10 @@ import { IsDateString, IsNumber, IsString, IsUUID, Min } from "class-validator"
 export class CreateIncomeDto {
 
     @IsUUID()
-    entrepreneur_id: string
+    entrepreneurId: string
 
     @IsUUID()
-    product_id: string
+    productId: string
 
     @IsNumber({
         maxDecimalPlaces: 2

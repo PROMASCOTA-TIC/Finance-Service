@@ -28,7 +28,8 @@ export class IncomesService implements OnModuleInit {
 
   async create(createIncomeDto: CreateIncomeDto) {
     //TODO: Conectar con el ms de productos para obtener la categoría del producto
-    const newIncome = { id: UuidV4() ,product_category: 'Alimento' , ...createIncomeDto };
+    //TODO: Coordinar coneccion con pago (Jackson)
+    const newIncome = { id: UuidV4() ,productCategory: 'Alimento' , ...createIncomeDto };
     try {
       return await this.incomeModel.create(newIncome);
     } catch (error) {
