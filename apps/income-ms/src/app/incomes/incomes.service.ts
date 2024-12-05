@@ -28,7 +28,7 @@ export class IncomesService implements OnModuleInit {
 
   async create(createIncomeDto: CreateIncomeDto) {
     //TODO: Conectar con el ms de productos para obtener la categoría del producto
-    const newIncome = { id: UuidV4() ,product_category: 'Alimento' ,...createIncomeDto };
+    const newIncome = { id: UuidV4() ,product_category: 'Alimento' , ...createIncomeDto };
     try {
       return await this.incomeModel.create(newIncome);
     } catch (error) {
@@ -54,10 +54,12 @@ export class IncomesService implements OnModuleInit {
   }
 
   async findByDateRange(getByDateRangeDto: GetByDateRangeDto) {
+    const endDate = new Date(getByDateRangeDto.endDate);
+    endDate.setHours(23, 59, 59, 999);
     return await this.incomeModel.findAll({    
       where: {
         CREATED_AT: {
-          [Op.between]: [getByDateRangeDto.startDate, getByDateRangeDto.endDate]
+          [Op.between]: [getByDateRangeDto.startDate, endDate]
         }
       }
     }).catch((error) => {
