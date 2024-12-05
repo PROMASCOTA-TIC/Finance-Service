@@ -16,21 +16,21 @@ export class Income extends Model {
         allowNull: false,
         field: 'ENTREPRENEUR_ID',
     })
-    entrepreneur_id: number;
+    entrepreneurId: number;
 
     @Column({
         type: DataType.STRING,
         allowNull: false,
         field: 'PRODUCT_ID',
     })
-    product_id: number;
+    productId: number;
 
     @Column({
         type: DataType.STRING,
         allowNull: false,
         field: 'PRODUCT_CATEGORY',
     })
-    product_category: string;
+    productCategory: string;
 
     @Column({
         type: DataType.DECIMAL(10,2),
