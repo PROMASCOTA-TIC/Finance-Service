@@ -39,7 +39,7 @@ export class Expense extends Model {
     expenseDate: Date;
     
     @Column({
-        type: DataType.NUMBER,
+        type: DataType.DECIMAL(10,2),
         allowNull: false,
         field: 'PRICE',
     })
