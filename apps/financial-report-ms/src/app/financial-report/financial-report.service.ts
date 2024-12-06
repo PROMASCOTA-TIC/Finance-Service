@@ -55,16 +55,27 @@ export class FinancialReportService {
   async getFinanceData(dateRange: GetByDateRangeDto) {
     const incomes = await this.getIncomesByRangeDate(dateRange);
     const expenses = await this.getExpensesByRangeDate(dateRange);
-    const incomesTotal = incomes.map((income: any) => Number(income.price)).reduce((a: number, b: number) => a + b, 0);
-    const expensesTotal = expenses.map((expense: any) => Number(expense.price)).reduce((a: number, b: number) => a + b, 0);
+    const incomesTotal = incomes
+      .map((income: any) => Number(income.price))
+      .reduce((a: number, b: number, index: number) => {
+        const sum = a + b;
+        return sum;
+      }, 0);
+
+    const expensesTotal = expenses
+      .map((expense: any) => Number(expense.price))
+      .reduce((a: number, b: number, index: number) => {
+        const sum = a + b;
+        return sum;
+      }, 0);
     const balance = parseFloat((incomesTotal - expensesTotal).toFixed(2));
 
     const data = {
       ingresos: incomes,
       egresos: expenses,
-      incomes: incomesTotal,
-      expenses: expensesTotal,
-      balance: balance
+      incomes: incomesTotal.toFixed(2),
+      expenses: expensesTotal.toFixed(2),
+      balance: balance.toFixed(2)
     }
     return data;
   }
@@ -74,21 +85,16 @@ export class FinancialReportService {
     const endDate = new Date(getByRangeDto.endDate);
     endDate.setHours(23, 59, 59);
     const oneWeek = 7 * 24 * 60 * 60 * 1000;
-    console.log(movement);
     if ((endDate.getTime() - startDate.getTime()) <= oneWeek) {
       const dailyTotals = movement.reduce((acc: any, movement: any) => {
         let date: string;
         if (!movement.expenseDate) {
           date = new Date(movement.createdAt).toLocaleDateString('es-ES', { weekday: 'short' });
-          console.log(date);
         }
         if (movement.expenseDate) {
-          console.log(movement.expenseDate);
           const expenseDate = new Date(movement.expenseDate);
           expenseDate.setHours(expenseDate.getHours() + 6);
-          console.log(expenseDate);
           date = expenseDate.toLocaleDateString('es-ES', { weekday: 'short' });
-          console.log(date);
         }
         if (!acc[date]) {
           acc[date] = 0;
@@ -97,11 +103,11 @@ export class FinancialReportService {
         return acc;
       }, {});
 
-      const result = Object.keys(dailyTotals).map(day => ({
+      const allDays = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
+      const result = allDays.map(day => ({
         day,
-        total: dailyTotals[day]
+        total: dailyTotals[day] ? dailyTotals[day].toFixed(2) : '0.00'
       }));
-      console.log(result);
       return result;
     } else {
       const monthlyTotals = movement.reduce((acc: any, movement: any) => {
@@ -110,12 +116,9 @@ export class FinancialReportService {
           date = new Date(movement.createdAt).toLocaleDateString('es-ES', { month: 'short' });
         }
         if (movement.expenseDate) {
-          console.log(movement.expenseDate);
           const expenseDate = new Date(movement.expenseDate);
           expenseDate.setHours(expenseDate.getHours() + 6);
-          console.log(expenseDate);
           date = expenseDate.toLocaleDateString('es-ES', { month: 'short' });
-          console.log(date);
         }
         if (!acc[date]) {
           acc[date] = 0;
@@ -124,11 +127,11 @@ export class FinancialReportService {
         return acc;
       }, {});
 
-      const result = Object.keys(monthlyTotals).map(month => ({
+      const allMonths = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+      const result = allMonths.map(month => ({
         month,
-        total: monthlyTotals[month]
+        total: monthlyTotals[month] ? monthlyTotals[month].toFixed(2) : '0.00'
       }));
-      console.log(result);
       return result;
     }
   }
@@ -148,13 +151,11 @@ export class FinancialReportService {
   async getIncomesByCategories(getByRangeDto: GetByDateRangeDto) {
     const incomes = await this.getIncomesByRangeDate(getByRangeDto);
     const totalIncome = incomes.reduce((acc: number, income: any) => acc + Number(income.price), 0);
-    console.log(totalIncome);
-    console.log(incomes);
     const data = incomes.reduce((acc: any, income: any) => {
-      if (!acc[income.product_category]) {
-        acc[income.product_category] = 0;
+      if (!acc[income.productCategory]) {
+        acc[income.productCategory] = 0;
       }
-      acc[income.product_category] += Number(income.price);
+      acc[income.productCategory] += Number(income.price);
       return acc;
     }, {});
 
@@ -162,10 +163,8 @@ export class FinancialReportService {
       label: category,
       value: parseFloat(((data[category] / totalIncome) * 100).toFixed(2))
     }));
-    console.log(result);
     return result;
   }
-
 
   async getExpensesByCategories(getByRangeDto: GetByDateRangeDto) {
     const expenses = await this.getExpensesByRangeDate(getByRangeDto);
@@ -183,8 +182,43 @@ export class FinancialReportService {
       label: category,
       value: parseFloat(((data[category] / totalExpense) * 100).toFixed(2))
     }));
-    console.log(result);
     return result;
   }
 
+  async getTotalIncomesByRangeDate(dateRange: GetByDateRangeDto) {
+    const incomes = await this.getIncomesByRangeDate(dateRange);
+
+    const incomesTotal = incomes
+      .map((income: any) => Number(income.price))
+      .reduce((a: number, b: number, index: number) => {
+        const sum = a + b;
+        console.log(`Step ${index + 1}: ${a} + ${b} = ${sum}`);
+        return sum;
+      }, 0);
+
+    return incomesTotal.toFixed(2);
+  }
+
+  async getTotalExpensesByRangeDate(dateRange: GetByDateRangeDto) {
+    const expenses = await this.getExpensesByRangeDate(dateRange);
+
+    const expensesTotal = expenses
+      .map((expense: any) => Number(expense.price))
+      .reduce((a: number, b: number, index: number) => {
+        const sum = a + b;
+        console.log(
+          `Step ${index + 1}: ${a} + ${b} = ${sum}`
+        );
+        return sum;
+      }, 0);
+    
+    return expensesTotal.toFixed(2);
+  }
+
+  async getBalanceByRangeDate(dateRange: GetByDateRangeDto) {
+    const incomesTotal = await this.getTotalIncomesByRangeDate(dateRange);
+    const expensesTotal = await this.getTotalExpensesByRangeDate(dateRange);
+    const balance = parseFloat((Number(incomesTotal) - Number(expensesTotal)).toFixed(2));
+    return balance.toFixed(2);
+  }
 }

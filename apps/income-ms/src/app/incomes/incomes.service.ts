@@ -5,7 +5,6 @@ import { Income } from './models/income.models';
 import { InjectModel } from '@nestjs/sequelize';
 import { GetByDateRangeDto } from './dto/get-income-by-range.dto';
 import { Op } from 'sequelize';
-import { NotFoundError } from 'rxjs';
 
 
 @Injectable()
@@ -55,12 +54,15 @@ export class IncomesService implements OnModuleInit {
   }
 
   async findByDateRange(getByDateRangeDto: GetByDateRangeDto) {
-    const endDate = new Date(getByDateRangeDto.endDate);
-    endDate.setHours(23, 59, 59, 999);
+    const { startDate, endDate } = getByDateRangeDto;
+    const startDateTemp = new Date(startDate);
+    const endDateTemp = new Date(endDate);
+    endDateTemp.setHours(23, 59, 59, 999);
+    startDateTemp.setHours(0, 0, 0, 0);
     return await this.incomeModel.findAll({    
       where: {
         CREATED_AT: {
-          [Op.between]: [getByDateRangeDto.startDate, endDate]
+          [Op.between]: [startDateTemp, endDateTemp]
         }
       }
     }).catch((error) => {

@@ -32,4 +32,18 @@ export class FinancialReportController {
     return this.financialReportService.getExpensesByCategories(getByRangeDto);
   }
 
+  @MessagePattern('get_total_incomes_by_range')
+  getTotalIncomesByRange(@Payload() getByRangeDto: GetByDateRangeDto) {
+    return this.financialReportService.getTotalIncomesByRangeDate(getByRangeDto);
+  }
+
+  @MessagePattern('get_total_expenses_by_range')
+  getTotalExpensesByRange(@Payload() getByRangeDto: GetByDateRangeDto) {
+    return this.financialReportService.getTotalExpensesByRangeDate(getByRangeDto);
+  }
+
+  @MessagePattern('get_balance_by_range')
+  getBalanceByRange(@Payload() getByRangeDto: GetByDateRangeDto) {
+    return this.financialReportService.getBalanceByRangeDate(getByRangeDto);
+  }
 }

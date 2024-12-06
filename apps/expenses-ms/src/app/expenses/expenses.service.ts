@@ -27,18 +27,21 @@ export class ExpensesService implements OnModuleInit {
   }
 
   async create(createExpenseDto: CreateExpenseDto) {
+    const { expenseDate, ...rest } = createExpenseDto;
     try {
-      const expenseDate = new Date(createExpenseDto.expenseDate);
-      expenseDate.setHours(1,0,0,0)
+      const expenseDateMod = new Date(expenseDate);
+      expenseDateMod.setHours(expenseDateMod.getHours() + 1);
+      expenseDateMod.setMinutes(59, 59, 999);
       return await this.expense.create({
         id: UuidV4(),
-        expenseDate: expenseDate,
-        ...createExpenseDto
+        expenseDate: expenseDateMod,
+        ...rest
       });
     } catch (error) {
       this.logger.error('Error creating expense:', error.message);
       throw new Error(error.message);
     }
+    
   }
 
   async findAll() {
@@ -75,12 +78,15 @@ export class ExpensesService implements OnModuleInit {
   }
 
   async findByDateRange(getByDateRangeDto: GetByDateRangeDto) {
-    const endDate = new Date(getByDateRangeDto.endDate);
-    endDate.setHours(23,59,59,999);
+    const { startDate, endDate } = getByDateRangeDto;
+    const endDateTemp = new Date(endDate);
+    endDateTemp.setHours(23, 59, 59, 999);
+    const startDateTemp = new Date(startDate);
+    startDateTemp.setHours(0, 0, 0, 0);
     return await this.expense.findAll({
       where: {
         EXPENSE_DATE: {
-          [Op.between]: [getByDateRangeDto.startDate, endDate]
+          [Op.between]: [startDateTemp, endDateTemp]
         }
       }
     }).catch((error) => {
