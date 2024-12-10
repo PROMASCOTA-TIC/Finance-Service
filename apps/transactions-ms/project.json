@@ -1,0 +1,26 @@
+{
+  "name": "transactions-ms",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/transactions-ms/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "transactions-ms:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "transactions-ms:build:development"
+        },
+        "production": {
+          "buildTarget": "transactions-ms:build:production"
+        }
+      }
+    }
+  }
+}
