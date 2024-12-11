@@ -1,18 +1,19 @@
 import { Controller } from '@nestjs/common';
 import { CommissionsService } from './commissions.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { CalculateCommissionDto } from './dto/calculate-commission.dto';
 
 @Controller()
 export class CommissionsController {
   constructor(private readonly commissionsService: CommissionsService) { }
 
-  @MessagePattern({ cmd: 'calculateEntrepreneurCommission' })
-  calculateEntrepreneurCommission(@Payload() amount: number, commission: number) {
-    return this.commissionsService.calculateEntrepreneurCommission(amount, commission);
+  @MessagePattern('calculate_entrepreneur_commission')
+  calculateEntrepreneurCommission(@Payload() calculateCommissionDto: CalculateCommissionDto) {
+    return this.commissionsService.calculateEntrepreneurCommission(calculateCommissionDto);
   }
 
-  @MessagePattern({ cmd: 'calculatePetOwnerCommission' })
-  calculatePetOwnerCommission(@Payload() amount: number, commission: number) {
-    return this.commissionsService.calculatePetOwnerCommission(amount, commission);
+  @MessagePattern('calculate_pet_owner_commission')
+  calculatePetOwnerCommission(@Payload() calculateCommissionDto: CalculateCommissionDto) {
+    return this.commissionsService.calculatePetOwnerCommission(calculateCommissionDto);
   }
 }
