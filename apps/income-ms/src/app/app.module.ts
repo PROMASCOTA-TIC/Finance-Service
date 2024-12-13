@@ -2,8 +2,9 @@ import { Module } from '@nestjs/common';
 import { IncomesModule } from './incomes/incomes.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { envs } from '../config';
-import { Income } from './incomes/models/income.models';
+import { ProductSale } from './incomes/models/productSale.models';
 import { Dialect } from 'sequelize';
+import { Income } from './incomes/models/income.model';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { Dialect } from 'sequelize';
       dialectOptions: {
         connectString: envs.connectionString,
       },
-      models: [Income],
+      models: [Income, ProductSale],
     })
   ],
   controllers: [],

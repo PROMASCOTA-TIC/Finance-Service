@@ -12,32 +12,25 @@ export class Income extends Model {
     id: string;  
 
     @Column({
-        type: DataType.STRING,
+        type: DataType.DATE,
         allowNull: false,
-        field: 'ENTREPRENEUR_ID',
+        field: 'INCOME_DATE',
     })
-    entrepreneurId: number;
+    incomeDate: Date;
 
     @Column({
         type: DataType.STRING,
         allowNull: false,
-        field: 'PRODUCT_ID',
+        field: 'USER_ID',
     })
-    productId: number;
-
-    @Column({
-        type: DataType.STRING,
-        allowNull: false,
-        field: 'PRODUCT_CATEGORY',
-    })
-    productCategory: string;
+    userId: number;
 
     @Column({
         type: DataType.DECIMAL(10,2),
         allowNull: false,
-        field: 'PRICE',
+        field: 'AMOUNT',
     })
-    price: number;
+    amount: number;
 
     @Column({
         type: DataType.DATE,  
