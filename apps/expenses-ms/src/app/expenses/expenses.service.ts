@@ -45,10 +45,20 @@ export class ExpensesService implements OnModuleInit {
   }
 
   async findAll() {
-    return await this.expense.findAll().catch((error) => {
+    const expenses = await this.expense.findAll().catch((error) => {
       this.logger.error('Error getting expenses:', error.message);
       throw new NotFoundException('Error getting expenses:', error.message);
     });
+
+    const selectedFields = ['id', 'expenseDate', 'price', 'description', 'category']; 
+    const filteredExpenses = expenses.map(expense => {
+      const filteredExpense = {};
+      selectedFields.forEach(field => {
+        filteredExpense[field] = expense[field];
+      });
+      return filteredExpense;
+    });
+    return filteredExpenses;
   }
 
   async findOne(id: string) {
