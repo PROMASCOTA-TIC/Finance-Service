@@ -43,7 +43,7 @@
         "apps/expenses-ms-e2e/**/*",
         "apps/financial-report-ms-e2e/**/*",
         "apps/transactions-ms-e2e/**/*",
-        "apps/commissions-ms-e2e/**/*"
+        "apps/taxes-ms-e2e/**/*"
       ]
     }
   ]
