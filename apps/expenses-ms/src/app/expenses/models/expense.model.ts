@@ -49,6 +49,7 @@ export class Expense extends Model {
         type: DataType.DATE,  
         allowNull: false,
         field: 'CREATED_AT',
+        defaultValue: () => new Date(Date.now() - 5*60*60*1000),
     })
     createdAt: Date;
 

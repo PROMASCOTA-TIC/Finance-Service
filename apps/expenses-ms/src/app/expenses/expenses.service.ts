@@ -6,6 +6,7 @@ import { Expense } from './models/expense.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { GetByDateRangeDto } from './dto/get-income-by-range.dto';
+import exp from 'constants';
 
 
 @Injectable()
@@ -30,7 +31,7 @@ export class ExpensesService implements OnModuleInit {
     const { expenseDate, ...rest } = createExpenseDto;
     try {
       const expenseDateMod = new Date(expenseDate);
-      expenseDateMod.setHours(expenseDateMod.getHours() + 1);
+      expenseDateMod.setHours(expenseDateMod.getHours() + 5);
       expenseDateMod.setMinutes(59, 59, 999);
       return await this.expense.create({
         id: UuidV4(),
@@ -41,7 +42,7 @@ export class ExpensesService implements OnModuleInit {
       this.logger.error('Error creating expense:', error.message);
       throw new Error(error.message);
     }
-    
+
   }
 
   async findAll() {
@@ -50,11 +51,14 @@ export class ExpensesService implements OnModuleInit {
       throw new NotFoundException('Error getting expenses:', error.message);
     });
 
-    const selectedFields = ['id', 'expenseDate', 'price', 'description', 'category']; 
+    const selectedFields = ['id', 'expenseDate', 'price', 'description', 'category'];
     const filteredExpenses = expenses.map(expense => {
       const filteredExpense = {};
       selectedFields.forEach(field => {
         filteredExpense[field] = expense[field];
+        if (field === 'expenseDate') {
+          filteredExpense[field] = expense[field].toISOString().split('T')[0];
+        }
       });
       return filteredExpense;
     });
@@ -93,7 +97,9 @@ export class ExpensesService implements OnModuleInit {
     endDateTemp.setHours(23, 59, 59, 999);
     const startDateTemp = new Date(startDate);
     startDateTemp.setHours(0, 0, 0, 0);
-    return await this.expense.findAll({
+
+    const response = await this.expense.findAll({
+      attributes: ['id', 'expenseDate', 'price', 'description', 'category'],
       where: {
         EXPENSE_DATE: {
           [Op.between]: [startDateTemp, endDateTemp]
@@ -103,6 +109,17 @@ export class ExpensesService implements OnModuleInit {
       this.logger.error('Error getting incomes:', error.message);
       throw new NotFoundException('Error getting incomes:', error.message);
     });
+    const expense = response.map(expense => {
+      const filteredExpense = {};
+      Object.keys(expense.dataValues).forEach(field => {
+        filteredExpense[field] = expense[field];
+        if (field === 'expenseDate') {
+          filteredExpense[field] = expense[field].toISOString().split('T')[0];
+        }
+      });
+      return filteredExpense;
+    });
+    return expense;
   }
 
 }
