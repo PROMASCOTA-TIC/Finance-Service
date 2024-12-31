@@ -2,12 +2,13 @@ import { Module } from '@nestjs/common';
 import { IncomesService } from './incomes.service';
 import { IncomesController } from './incomes.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Income } from './models/productSale.models';
 import { ScheduleModule } from '@nestjs/schedule';
+import { Income } from './models/income.model';
+import { ProductSale } from './models/productSale.models';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([Income]),
+    SequelizeModule.forFeature([Income, ProductSale]),
     ScheduleModule.forRoot()
   ],
   controllers: [IncomesController],

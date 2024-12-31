@@ -12,6 +12,13 @@ export class ProductSale extends Model {
     id: string;  
 
     @Column({
+        type: DataType.DATE,
+        allowNull: false,
+        field: 'SALES_DATE',
+    })
+    salesDate: Date;
+
+    @Column({
         type: DataType.STRING,
         allowNull: false,
         field: 'ENTREPRENEUR_ID',
@@ -35,14 +42,15 @@ export class ProductSale extends Model {
     @Column({
         type: DataType.DECIMAL(10,2),
         allowNull: false,
-        field: 'PRICE',
+        field: 'AMOUNT',
     })
-    price: number;
+    amount: number;
 
     @Column({
         type: DataType.DATE,  
         allowNull: false,
         field: 'CREATED_AT',
+        defaultValue: () => new Date(Date.now() - 5*60*60*1000),
     })
     createdAt: Date;
 

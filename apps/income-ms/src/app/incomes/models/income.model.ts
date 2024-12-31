@@ -12,13 +12,6 @@ export class Income extends Model {
     id: string;  
 
     @Column({
-        type: DataType.DATE,
-        allowNull: false,
-        field: 'INCOME_DATE',
-    })
-    incomeDate: Date;
-
-    @Column({
         type: DataType.STRING,
         allowNull: false,
         field: 'USER_ID',
@@ -28,14 +21,22 @@ export class Income extends Model {
     @Column({
         type: DataType.DECIMAL(10,2),
         allowNull: false,
-        field: 'AMOUNT',
+        field: 'PRICE',
     })
-    amount: number;
+    price: number;
+
+    @Column({
+        type: DataType.STRING,
+        allowNull: false,
+        field: 'CATEGORY',
+    })
+    category: string;
 
     @Column({
         type: DataType.DATE,  
         allowNull: false,
         field: 'CREATED_AT',
+        defaultValue: () => new Date(Date.now() - 5*60*60*1000),
     })
     createdAt: Date;
 

@@ -3,7 +3,6 @@ import 'dotenv/config';
 import * as joi from 'joi';
 
 interface EnvVars {
-    // INCOME_PORT: number;
     DB_DIALECT: string;
     DB_INCOME_USERNAME: string;
     DB_INCOME_PASSWORD: string;
@@ -12,7 +11,6 @@ interface EnvVars {
 }
 
 const envsSchema = joi.object({
-    // INCOME_PORT: joi.number().required(),
     DB_DIALECT: joi.string().required(),
     DB_INCOME_USERNAME: joi.string().required(),
     DB_INCOME_PASSWORD: joi.string().required(),
