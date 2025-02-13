@@ -42,9 +42,31 @@ export class Transaction extends Model {
     amount: number;
 
     @Column({
+        type: DataType.DECIMAL(10,2),
+        allowNull: false,
+        field: 'COMMISSION_VALUE',
+    })
+    commissionValue: number;
+
+    @Column({
+        type: DataType.STRING,
+        allowNull: true,
+        field: 'COMENT',
+    })
+    coment?: string;
+
+    @Column({
+        type: DataType.STRING,
+        allowNull: true,
+        field: 'PAYMENT_DATE',
+    })
+    paymentDate?: string;
+
+    @Column({
         type: DataType.DATE,  
         allowNull: false,
         field: 'CREATED_AT',
+        defaultValue: () => new Date(Date.now() - 5*60*60*1000),
     })
     createdAt: Date;
 

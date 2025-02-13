@@ -11,7 +11,7 @@ export class CreateTransactionDto {
 
     @IsString()
     @IsIn(['P', 'S'])
-    state: string;
+    state?: string;
 
     @IsNumber({
         maxDecimalPlaces: 2
@@ -19,4 +19,10 @@ export class CreateTransactionDto {
     @Min(0)
     @Type(() => Number)
     amount: number
+
+    @IsString()
+    coment?: string;
+
+    @IsDateString()
+    paymentDate?: Date;
 }

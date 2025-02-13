@@ -11,12 +11,12 @@ export class TransactionsController {
 
   @MessagePattern('create_entrepreneur_payment')
   createEntrepreneurPayment(@Payload() creatTransactionDto: CreateTransactionDto) {
-    return this.transactionsService.createEntrepreneurPayment(creatTransactionDto);
+    return this.transactionsService.createEntrepreneurPayment();
   }
 
   @MessagePattern('find_all_entrepreneur_payments')
   findAllEntrepreneurPayments() {
-    return this.transactionsService.findAllEntrepreneurPayment();
+    return this.transactionsService.findAllEntrepreneursPayments();
   }
 
   @MessagePattern('find_one_entrepreneur_payment')
@@ -30,8 +30,12 @@ export class TransactionsController {
   }
 
   @MessagePattern('validate_transfer')
-  validateTransfer(@Payload() id: string, updateTransferDto: UpdateTransferDto) {
-    return this.transactionsService.validateTransfer(id, updateTransferDto);
+  validateTransfer(@Payload() updateTransferDto: UpdateTransferDto) {
+    return this.transactionsService.validateTransfer(updateTransferDto);
   }
 
+  @MessagePattern('find_all_transfers')
+  findAllTransfers() {
+    return this.transactionsService.getTransfers();
+  }
 }

@@ -4,10 +4,12 @@ import { TransactionsController } from './transactions.controller';
 import { Transaction } from './models/transactions.model';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { HttpModule } from '@nestjs/axios';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     SequelizeModule.forFeature([Transaction]),
+    ScheduleModule.forRoot(),
     HttpModule
   ],
   controllers: [TransactionsController],

@@ -1,14 +1,15 @@
-import { IsString, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class UpdateTransferDto {
   
   @IsUUID()
   id: string;
 
+  @IsOptional()
   @IsString()
-  state: string;
+  status?: string;
 
   @IsString()
-  observation: string;
+  comment: string;
 
 }
