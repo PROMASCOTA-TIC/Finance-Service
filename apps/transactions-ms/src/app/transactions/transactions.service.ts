@@ -1,20 +1,24 @@
-import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { HttpService } from '@nestjs/axios';
 import { v4 as UuidV4 } from 'uuid';
 import { UpdateTransactionDto } from './dto/update-transactions.dto';
 import { UpdateTransferDto } from './dto/update-transfer.dto';
 import { Transaction } from './models/transactions.model';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Sequelize } from 'sequelize-typescript';
 import { URL_BASE } from '../../config';
+import { ClientProxy } from '@nestjs/microservices';
+import { endOfWeek, isWithinInterval, startOfWeek } from 'date-fns';
 
 @Injectable()
 export class TransactionsService implements OnModuleInit {
   constructor(
     @InjectModel(Transaction)
     private transactionModel: typeof Transaction,
+    @Inject('ORDER_SERVICE')
+    private readonly orderClient: ClientProxy,
     private httpService: HttpService,
     private sequelize: Sequelize
   ) { }
@@ -122,6 +126,57 @@ export class TransactionsService implements OnModuleInit {
       throw new NotFoundException(`transaction with id ${id} not found`);
     }
     return transaction;
+  }
+
+  async findOneEntrepreneurPaymentByUser(entrepreneurId: string) {
+    try {
+      const orders = await lastValueFrom(
+        this.orderClient.send('get_orders_by_entrepreneur', { entrepreneurId }),
+      );
+
+      const entrepreneur = await firstValueFrom(
+        this.httpService.get(`${URL_BASE}users/entrepreneurs/` + entrepreneurId)
+      );
+
+      const today = new Date();
+
+      const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 });
+      const endOfCurrentWeek = endOfWeek(today, { weekStartsOn: 1 });
+
+      startOfCurrentWeek.setUTCHours(0, 0, 0, 0);
+      endOfCurrentWeek.setUTCHours(23, 59, 59, 999);
+
+      const filteredOrders = orders.filter(order =>
+        order.paidAt && isWithinInterval(new Date(order.paidAt), {
+          start: startOfCurrentWeek,
+          end: endOfCurrentWeek,
+        })
+      );
+
+      const ordersWithTotal = filteredOrders.map(order => {
+        const total = order.orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        return { ...order, total:  parseFloat(total.toFixed(2)) };
+      });
+      
+      const finalData = ordersWithTotal.map(order => {
+        return { orderId: order.id, fecha: order.paidAt, total: order.total};
+      });
+
+      const subtotal = finalData.reduce((sum, item) => sum + item.total, 0);
+      const commissionValue = subtotal * entrepreneur.data.commission/100;
+      const totalAmount = subtotal - parseFloat(commissionValue.toFixed(2));
+
+      return { 
+        orders: finalData, 
+        totalAmount: parseFloat(totalAmount.toFixed(2)), 
+        commissionValue: parseFloat(commissionValue.toFixed(2)),
+        subtotal: subtotal,
+        commission: entrepreneur.data.commission 
+      };
+    } catch (error) {
+      this.logger.error('Error getting entrepreneur payments: ', error.message);
+      throw new NotFoundException('Error getting entrepreneur payments: ', error.message);
+    }
   }
 
   async updateEntrepreneurPayment(id: string, updateTransactionDto: UpdateTransactionDto) {

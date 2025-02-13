@@ -24,6 +24,11 @@ export class TransactionsController {
     return this.transactionsService.findOneEntrepreneurPayment(id);
   }
 
+  @MessagePattern('find_one_entrepreneur_payments_by_user')
+  findOneEntrepreneurPaymentByUser(@Payload() userId: string) {
+    return this.transactionsService.findOneEntrepreneurPaymentByUser(userId);
+  }
+
   @MessagePattern('update_entrepreneur_payment')
   updateEntrepreneurPayment(@Payload() updateTransactionDto: UpdateTransactionDto) {
     return this.transactionsService.updateEntrepreneurPayment(updateTransactionDto.id, updateTransactionDto);
