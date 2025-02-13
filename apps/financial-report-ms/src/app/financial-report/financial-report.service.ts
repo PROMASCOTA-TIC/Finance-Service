@@ -1,8 +1,9 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Search } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { GetByDateRangeDto } from './dto/get-by-date-range.dto';
 import { RpcException } from '@nestjs/microservices';
+import { URL_BASE } from '../../config';
 
 @Injectable()
 export class FinancialReportService {
@@ -21,16 +22,16 @@ export class FinancialReportService {
     if (!endDate) {
       endDate = new Date(currentYear, 11, 31, 23, 59, 59);
     }
-    try{
+    try {
       const sales = await firstValueFrom(
-        this.httpService.post('http://localhost:3001/api/incomes/sales-date-range', {
+        this.httpService.post(`${URL_BASE}incomes/sales-date-range`, {
           startDate: startDate,
           endDate: endDate
         })
       )
-    return sales.data;
+      return sales.data;
     }
-    catch(error){
+    catch (error) {
       throw new RpcException(error);
     }
   }
@@ -49,7 +50,7 @@ export class FinancialReportService {
     }
 
     const incomes = await firstValueFrom(
-      this.httpService.post('http://localhost:3001/api/incomes/date-range', {
+      this.httpService.post(`${URL_BASE}incomes/date-range`, {
         startDate: startDate,
         endDate: endDate
       })
@@ -71,7 +72,7 @@ export class FinancialReportService {
     }
 
     const expenses = await firstValueFrom(
-      this.httpService.post('http://localhost:3001/api/expenses/range', {
+      this.httpService.post(`${URL_BASE}expenses/range`, {
         startDate: startDate,
         endDate: endDate
       })
@@ -81,14 +82,21 @@ export class FinancialReportService {
 
   async getEntrepreneurName(entrepreneurId: string) {
     const entrepreneur = await firstValueFrom(
-      this.httpService.get('http://localhost:3001/api/entrepreneur/' + entrepreneurId)
+      this.httpService.get(`${URL_BASE}users/entrepreneurs/` + entrepreneurId)
     )
     return entrepreneur.data;
   }
 
+  async getPetOwnerName(petOwnerId: string) {
+    const petOwner = await firstValueFrom(
+      this.httpService.get(`${URL_BASE}users/pet-owner/` + petOwnerId)
+    )
+    return petOwner.data;
+  }
+
   async getProductsName(productId: string) {
     const product = await firstValueFrom(
-      this.httpService.get('http://localhost:3001/api/products/' + productId)
+      this.httpService.get(`${URL_BASE}products/` + productId)
     )
     return product.data;
   }
@@ -98,12 +106,11 @@ export class FinancialReportService {
     const expenses = await this.getExpensesByRangeDate(dateRange);
     const sales = await this.getSalesByRangeDate(dateRange);
     const incomesTotal = await incomes
-      .map((income: any) => Number(income.price))
+      .map((income: any) => Number(income.commissionValue))
       .reduce((a: number, b: number) => {
         const sum = a + b;
         return sum;
       }, 0);
-
     const expensesTotal = await expenses
       .map((expense: any) => Number(expense.price))
       .reduce((a: number, b: number) => {
@@ -111,17 +118,29 @@ export class FinancialReportService {
         return sum;
       }, 0);
     const balance = parseFloat((incomesTotal - expensesTotal).toFixed(2));
-
-    const incomesData = await Promise.all(incomes.map(async (income: any) => {
-      // const entrepreneur = await this.getEntrepreneurName(income.entrepreneurId);
-      return income = {
-        id: income.id,
-        userName: '', //entrepreneur.name,
-        amount: Number(income.price),
-        incomeDate: new Date(income.createdAt)
-      };
-    }));
-
+    const incomesData = await Promise.all(incomes
+      .map(async (income: any) => {
+        if (income.category === 'Emprendedor') {
+          const entrepreneur = await this.getEntrepreneurName(income.userId);
+          const aux = {
+            id: income.id,
+            userName: entrepreneur.name,
+            amount: Number(income.commissionValue),
+            incomeDate: new Date(income.createdAt)
+          };
+          return aux;
+        }
+        if (income.category === 'Comprador') {
+          const petOwner = await this.getPetOwnerName(income.userId);
+          const aux = {
+            id: income.id,
+            userName: petOwner.name,
+            amount: Number(income.commissionValue),
+            incomeDate: new Date(income.createdAt)
+          };
+          return aux;
+        }
+      }));
     const expensesData = await Promise.all(expenses.map(async (expense: any) => {
       return expense = {
         id: expense.id,
@@ -131,20 +150,19 @@ export class FinancialReportService {
         expenseDate: new Date(expense.expenseDate)
       };
     }));
-
     const salesData = await Promise.all(sales.map(async (sale: any) => {
-      // const entrepreneur = await this.getEntrepreneurName(sale.entrepreneurId);
-      // const product = await this.getProductsName(sale.productId);
-      return sale = {
+      const entrepreneur = await this.getEntrepreneurName(sale.entrepreneurId);
+      const product = await this.getProductsName(sale.productId);
+      const saleAux = {
         id: sale.id,
-        entrepreneurName:'', //entrepreneur.name,
-        productName: '', // poner el nombre que se traiga product.name,
-        productCategory: sale.productCategory, // poner la categoria que se traiga product.category.name,
+        entrepreneurName: entrepreneur.name,
+        productName: product.name,
+        productCategory: product.category.name,
         amount: Number(sale.amount),
         saleDate: new Date(sale.salesDate)
       };
+      return saleAux;
     }));
-    console.log(salesData);
     const data = {
       ingresos: incomesData,
       egresos: expensesData,
@@ -156,7 +174,7 @@ export class FinancialReportService {
     return data;
   }
 
-  async getDataSummaryByDateRange(getByRangeDto: GetByDateRangeDto, movement: any) {
+  async getDataSummaryByDateRange(getByRangeDto: GetByDateRangeDto, movement: any, type: string) {
     const startDate = new Date(getByRangeDto.startDate);
     const endDate = new Date(getByRangeDto.endDate);
     endDate.setHours(23, 59, 59);
@@ -164,19 +182,24 @@ export class FinancialReportService {
     if ((endDate.getTime() - startDate.getTime()) <= oneWeek) {
       const dailyTotals = movement.reduce((acc: any, movement: any) => {
         let date: string;
-        if (!movement.expenseDate) {
+        if (type === 'income') {
           date = new Date(movement.createdAt).toLocaleDateString('es-ES', { weekday: 'short' });
+          if (!acc[date]) {
+            acc[date] = 0;
+          }
+          acc[date] += Number(movement.commissionValue);
+          return acc;
         }
-        if (movement.expenseDate) {
+        if (type === 'expense') {
           const expenseDate = new Date(movement.expenseDate);
           expenseDate.setHours(expenseDate.getHours() + 6);
           date = expenseDate.toLocaleDateString('es-ES', { weekday: 'short' });
+          if (!acc[date]) {
+            acc[date] = 0;
+          }
+          acc[date] += Number(movement.price);
+          return acc;
         }
-        if (!acc[date]) {
-          acc[date] = 0;
-        }
-        acc[date] += Number(movement.price);
-        return acc;
       }, {});
 
       const allDays = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
@@ -188,19 +211,24 @@ export class FinancialReportService {
     } else {
       const monthlyTotals = movement.reduce((acc: any, movement: any) => {
         let date: string;
-        if (!movement.expenseDate) {
+        if (type === 'income') {
           date = new Date(movement.createdAt).toLocaleDateString('es-ES', { month: 'short' });
+          if (!acc[date]) {
+            acc[date] = 0;
+          }
+          acc[date] += Number(movement.commissionValue);
+          return acc;
         }
-        if (movement.expenseDate) {
+        if (type === 'expense') {
           const expenseDate = new Date(movement.expenseDate);
           expenseDate.setHours(expenseDate.getHours() + 6);
           date = expenseDate.toLocaleDateString('es-ES', { month: 'short' });
+          if (!acc[date]) {
+            acc[date] = 0;
+          }
+          acc[date] += Number(movement.price);
+          return acc;
         }
-        if (!acc[date]) {
-          acc[date] = 0;
-        }
-        acc[date] += Number(movement.price);
-        return acc;
       }, {});
 
       const allMonths = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
@@ -214,24 +242,24 @@ export class FinancialReportService {
 
   async getIncomesByDate(getByRangeDto: GetByDateRangeDto) {
     const incomes = await this.getIncomesByRangeDate(getByRangeDto);
-    const data = this.getDataSummaryByDateRange(getByRangeDto, incomes);
+    const data = this.getDataSummaryByDateRange(getByRangeDto, incomes, 'income');
     return data;
   }
 
   async getExpensesByDate(getByRangeDto: GetByDateRangeDto) {
     const expenses = await this.getExpensesByRangeDate(getByRangeDto);
-    const data = this.getDataSummaryByDateRange(getByRangeDto, expenses);
+    const data = this.getDataSummaryByDateRange(getByRangeDto, expenses, 'expense');
     return data;
   }
 
   async getIncomesByCategories(getByRangeDto: GetByDateRangeDto) {
     const incomes = await this.getIncomesByRangeDate(getByRangeDto);
-    const totalIncome = incomes.reduce((acc: number, income: any) => acc + Number(income.price), 0);
+    const totalIncome = incomes.reduce((acc: number, income: any) => acc + Number(income.commissionValue), 0);
     const data = incomes.reduce((acc: any, income: any) => {
       if (!acc[income.category]) {
         acc[income.category] = 0;
       }
-      acc[income.category] += Number(income.price);
+      acc[income.category] += Number(income.commissionValue);
       return acc;
     }, {});
 
@@ -265,7 +293,7 @@ export class FinancialReportService {
     const incomes = await this.getIncomesByRangeDate(dateRange);
 
     const incomesTotal = incomes
-      .map((income: any) => Number(income.price))
+      .map((income: any) => Number(income.commissionValue))
       .reduce((a: number, b: number) => {
         const sum = a + b;
         return sum;
