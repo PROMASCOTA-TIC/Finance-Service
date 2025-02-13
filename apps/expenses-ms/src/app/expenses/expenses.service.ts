@@ -6,7 +6,6 @@ import { Expense } from './models/expense.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { GetByDateRangeDto } from './dto/get-income-by-range.dto';
-import exp from 'constants';
 
 
 @Injectable()
@@ -46,7 +45,9 @@ export class ExpensesService implements OnModuleInit {
   }
 
   async findAll() {
-    const expenses = await this.expense.findAll().catch((error) => {
+    const expenses = await this.expense.findAll({
+      order: [['expenseDate', 'DESC']]
+    }).catch((error) => {
       this.logger.error('Error getting expenses:', error.message);
       throw new NotFoundException('Error getting expenses:', error.message);
     });
@@ -104,7 +105,8 @@ export class ExpensesService implements OnModuleInit {
         EXPENSE_DATE: {
           [Op.between]: [startDateTemp, endDateTemp]
         }
-      }
+      },
+      order: [['expenseDate', 'DESC']]
     }).catch((error) => {
       this.logger.error('Error getting incomes:', error.message);
       throw new NotFoundException('Error getting incomes:', error.message);

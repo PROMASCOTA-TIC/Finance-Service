@@ -12,6 +12,7 @@ export class Tax extends Model{
         allowNull: false,
         unique: true,
         field: 'ID',
+        defaultValue: DataType.UUIDV4,
     })
     id: string;
 
@@ -20,7 +21,7 @@ export class Tax extends Model{
         allowNull: false,
         field: 'TAXES_DATE',
     })
-    taxesDate: Date
+    taxDate: Date
 
     @Column({
         type: DataType.DECIMAL(10,2),
@@ -47,6 +48,7 @@ export class Tax extends Model{
         type: DataType.DATE,  
         allowNull: false,
         field: 'CREATED_AT',
+        defaultValue: () => new Date(Date.now() - 5*60*60*1000),
     })
     createdAt: Date;
 

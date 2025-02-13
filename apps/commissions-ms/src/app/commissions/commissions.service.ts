@@ -8,15 +8,13 @@ export class CommissionsService {
 
     calculateEntrepreneurCommission(calculateCommissionDto: CalculateCommissionDto) {
         const { amount, commission } = calculateCommissionDto;
-        console.log(`Calculating entrepreneur commission for amount: ${calculateCommissionDto}`);
-        const totalPrice = amount * commission;
+        const totalPrice = amount * commission / 100;
         return totalPrice.toFixed(2);
     }
 
     calculatePetOwnerCommission(calculateCommissionDto: CalculateCommissionDto) {
-        const { amount, commission } = calculateCommissionDto;
-        console.log(`Calculating affiliate commission for amount: ${calculateCommissionDto}`);
-        const totalPrice = amount * commission;
+        const { amount } = calculateCommissionDto;
+        const totalPrice = amount * 0.5;
         return totalPrice.toFixed(2);
     }
 }
