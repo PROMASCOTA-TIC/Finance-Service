@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsNumber, Min } from "class-validator";
+import { IsNumber, IsOptional, Min } from "class-validator";
 
 export class CalculateCommissionDto {
 
@@ -10,10 +10,11 @@ export class CalculateCommissionDto {
     @Type(() => Number)
     amount: number;
 
+    @IsOptional()
     @IsNumber({
         maxDecimalPlaces: 2
     })
     @Min(0)
     @Type(() => Number)
-    commission: number;
+    commission?: number;
 }

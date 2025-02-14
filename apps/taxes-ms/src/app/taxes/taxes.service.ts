@@ -35,8 +35,8 @@ export class TaxesService {
     return totalCommissions;
   }
 
-  // @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
+  // @Cron(CronExpression.EVERY_MINUTE)
   async calculateMonthlyTax() {
     const totalCommissions = await this.calculateTotalCommissions();
     const ivaCalculated = totalCommissions * 0.15;

@@ -14,7 +14,7 @@ export class CommissionsService {
 
     calculatePetOwnerCommission(calculateCommissionDto: CalculateCommissionDto) {
         const { amount } = calculateCommissionDto;
-        const totalPrice = amount * 0.5;
+        const totalPrice = amount * 0.06;
         return totalPrice.toFixed(2);
     }
 }

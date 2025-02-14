@@ -131,7 +131,7 @@ export class TransactionsService implements OnModuleInit {
   async findOneEntrepreneurPaymentByUser(entrepreneurId: string) {
     try {
       const orders = await lastValueFrom(
-        this.orderClient.send('get_orders_by_entrepreneur', { entrepreneurId }),
+        this.orderClient.send('get_paid_orders_by_entrepreneur', { entrepreneurId }),
       );
 
       const entrepreneur = await firstValueFrom(
