@@ -5,12 +5,10 @@
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
-      "!{projectRoot}/.eslintrc.json",
-      "!{projectRoot}/eslint.config.js",
+
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
       "!{projectRoot}/tsconfig.spec.json",
-      "!{projectRoot}/jest.config.[jt]s",
-      "!{projectRoot}/src/test-setup.[jt]s",
+
       "!{projectRoot}/test-setup.[jt]s"
     ],
     "sharedGlobals": []
@@ -23,28 +21,7 @@
         "serveTargetName": "serve",
         "previewTargetName": "preview"
       }
-    },
-    {
-      "plugin": "@nx/eslint/plugin",
-      "options": {
-        "targetName": "lint"
-      }
-    },
-    {
-      "plugin": "@nx/jest/plugin",
-      "options": {
-        "targetName": "test"
-      },
-      "exclude": [
-        "apps/finance-service-e2e/**/*",
-        "apps/admin-ms-e2e/**/*",
-        "apps/income-ms-e2e/**/*",
-        "apps/comissions-ms-e2e/**/*",
-        "apps/expenses-ms-e2e/**/*",
-        "apps/financial-report-ms-e2e/**/*",
-        "apps/transactions-ms-e2e/**/*",
-        "apps/taxes-ms-e2e/**/*"
-      ]
     }
+
   ]
 }
