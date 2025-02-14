@@ -1,12 +1,16 @@
 import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
-import { v4 as UuidV4 } from 'uuid';
-import { CreateIncomeDto } from './dto/create-income.dto';
 import { InjectModel } from '@nestjs/sequelize';
-import { GetByDateRangeDto } from './dto/get-income-by-range.dto';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import { v4 as UuidV4 } from 'uuid';
 import { Op } from 'sequelize';
-import { Income } from './models/income.model';
-import { ProductSale } from './models/productSale.models';
 import axios from 'axios';
+import { GetByDateRangeDto } from './dto/get-income-by-range.dto';
+import { CreateIncomeDto } from './dto/create-income.dto';
+import { CreateSaleDto } from './dto/create-sale.dto';
+import { ProductSale } from './models/productSale.model';
+import { Income } from './models/income.model';
+import { URL_BASE } from '../../config/service';
 
 @Injectable()
 export class IncomesService implements OnModuleInit {
@@ -14,7 +18,8 @@ export class IncomesService implements OnModuleInit {
     @InjectModel(Income)
     private incomeModel: typeof Income,
     @InjectModel(ProductSale)
-    private productSaleModel: typeof ProductSale
+    private productSaleModel: typeof ProductSale,
+    private httpService: HttpService
   ) { }
   private readonly logger = new Logger('IncomesService');
 
@@ -28,10 +33,8 @@ export class IncomesService implements OnModuleInit {
     }
   }
 
-  
   async createIncome(createIncomeDto: CreateIncomeDto) {
     //TODO: Coordinar conexión con venta para almacenar la comisión que se le cobra al comprador (Jackson)
-    //TODO: Coordinar conexión con ventas para obtener todas las ventas en la semana de un emprendedor
     const newIncome = { id: UuidV4(), ...createIncomeDto };
     try {
       return await this.incomeModel.create(newIncome);
@@ -48,12 +51,13 @@ export class IncomesService implements OnModuleInit {
     endDateTemp.setHours(23, 59, 59, 999);
     startDateTemp.setHours(0, 0, 0, 0);
     return await this.incomeModel.findAll({
-      attributes: ['id', 'userId', 'price', 'category', 'createdAt'],
+      attributes: ['id', 'userId', 'commissionValue', 'category', 'createdAt'],
       where: {
         CREATED_AT: {
           [Op.between]: [startDateTemp, endDateTemp]
         }
-      }
+      },
+      order: [['createdAt', 'DESC']]
     }).catch((error) => {
       this.logger.error('Error getting incomes:', error.message);
       throw new NotFoundException('Error getting incomes:', error.message);
@@ -66,49 +70,70 @@ export class IncomesService implements OnModuleInit {
     const endDateTemp = new Date(endDate);
     endDateTemp.setHours(23, 59, 59, 999);
     startDateTemp.setHours(0, 0, 0, 0);
-    return await this.productSaleModel.findAll({
+    const sales = await this.productSaleModel.findAll({
       attributes: ['id', 'salesDate', 'entrepreneurId', 'productId', 'productCategory', 'amount'],
       where: {
         SALES_DATE: {
           [Op.between]: [startDateTemp, endDateTemp]
         }
-      }
+      },
+      order: [['salesDate', 'DESC']]
     }).catch((error) => {
-      this.logger.error('Error getting salessssssssssss:', error.message);
-      throw new NotFoundException('Error getting salessssssssssssssss:', error.message);
+      this.logger.error('Error getting sales:', error.message);
+      throw new NotFoundException('Error getting sale:', error.message);
     });
+    const salesMod = await Promise.all(sales.map(async (sale) => {
+      const entrepreneur = await this.getEntrepreneurName(sale.entrepreneurId.toString());
+      const product = await this.getProductsName(sale.productId.toString());
+      const aux = {
+        id: sale.id,
+        salesDate: sale.salesDate,
+        entrepreneurName: entrepreneur.name,
+        productName: product.name,
+        productCategory: sale.productCategory,
+        amount: sale.amount
+      }
+      return aux;
+    }));
+    return salesMod;
   }
-  
-  async createSaleByProduct(createIncomeDto: CreateIncomeDto) {
+
+  async createSaleByProduct(createSaleDto: { entrepreneurId: string, productId: string, salesDate: string, amount: number }) {
     //TODO: Coordinar conexion con pago (Jackson) VER QUE DATOS RECIBE
     try {
-      const response = await axios.get('http://localhost:3001/api/products/' + createIncomeDto.productId);
+      const response = await axios.get(`${URL_BASE}products/` + createSaleDto.productId);
       const product = response.data;
-      const newProductSale = { id: UuidV4(), productCategory: product.category.name, ...createIncomeDto };
+      const newProductSale = {
+        id: UuidV4(),
+        productCategory: product.category.name,
+        salesDate: new Date(createSaleDto.salesDate),
+        entrepreneurId: createSaleDto.entrepreneurId,
+        amount: createSaleDto.amount,
+        productId: createSaleDto.productId,
+      };
       return await this.productSaleModel.create(newProductSale);
     } catch (error) {
-      this.logger.error('Error creating incomes:', error.message);
-      throw new Error(`Error creating income: ${error.message}`);
+      this.logger.error('Error creating sale:', error.message);
+      throw new Error(`Error creating sale: ${error.message}`);
     }
   }
 
   async getWeeklySales(entrepreneurId: string) {
-    //TODO: Coordinar conexión con ventas (JSON) para obtener sus ventas en la semana
     const currentDate = new Date();
-    const firstDayOfWeek = new Date(currentDate.setDate(currentDate.getDate() - (currentDate.getDay() === 0 ? 6 : currentDate.getDay() - 1)));
-    firstDayOfWeek.setHours(0, 0, 0, 0);
-    const lastDayOfWeek = new Date();
-    lastDayOfWeek.setDate(currentDate.getDate() - (currentDate.getDay() === 0 ? 6 : currentDate.getDay() - 1) + 6);
-    lastDayOfWeek.setHours(23, 59, 59, 999);
-
+    const firstDayOfWeek = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate() - (currentDate.getUTCDay() === 0 ? 6 : currentDate.getUTCDay() - 1)));
+    const lastDayOfWeek = new Date(firstDayOfWeek);
+    lastDayOfWeek.setUTCDate(firstDayOfWeek.getUTCDate() + 6);
+    firstDayOfWeek.setUTCHours(0, 0, 0, 0);
+    lastDayOfWeek.setUTCHours(23, 59, 59, 999);
     const weeklySales = await this.productSaleModel.findAll({
       attributes: ['id', 'salesDate', 'entrepreneurId', 'productId', 'productCategory', 'amount'],
       where: {
         ENTREPRENEUR_ID: entrepreneurId,
-        CREATED_AT: {
+        SALES_DATE: {
           [Op.between]: [firstDayOfWeek, lastDayOfWeek]
-        }
-      }
+        },
+      },
+      order: [['salesDate', 'DESC']]
     });
 
     if (!weeklySales) {
@@ -119,7 +144,9 @@ export class IncomesService implements OnModuleInit {
   }
 
   async findAll() {
-    return await this.productSaleModel.findAll().catch((error) => {
+    return await this.productSaleModel.findAll({
+      order: [['createdAt', 'DESC']]
+    }).catch((error) => {
       this.logger.error('Error getting sales:', error.message);
       throw new NotFoundException('Error getting sales:', error.message);
     });
@@ -132,5 +159,19 @@ export class IncomesService implements OnModuleInit {
       throw new NotFoundException(`Income with id ${id} not found`);
     }
     return income;
+  }
+
+  async getEntrepreneurName(entrepreneurId: string) {
+    const entrepreneur = await firstValueFrom(
+      this.httpService.get(`${URL_BASE}users/entrepreneurs/` + entrepreneurId)
+    )
+    return entrepreneur.data;
+  }
+
+  async getProductsName(productId: string) {
+    const product = await firstValueFrom(
+      this.httpService.get(`${URL_BASE}products/` + productId)
+    )
+    return product.data;
   }
 }

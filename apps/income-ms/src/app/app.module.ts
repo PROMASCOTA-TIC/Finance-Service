@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { IncomesModule } from './incomes/incomes.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { envs } from '../config';
-import { ProductSale } from './incomes/models/productSale.models';
+import { ProductSale } from './incomes/models/productSale.model';
 import { Dialect } from 'sequelize';
 import { Income } from './incomes/models/income.model';
 

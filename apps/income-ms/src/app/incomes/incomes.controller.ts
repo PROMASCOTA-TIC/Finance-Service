@@ -3,6 +3,7 @@ import { IncomesService } from './incomes.service';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { GetByDateRangeDto } from './dto/get-income-by-range.dto';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { CreateSaleDto } from './dto/create-sale.dto';
 
 @Controller('incomes')
 export class IncomesController {
@@ -10,7 +11,6 @@ export class IncomesController {
 
   @MessagePattern('create_income')
   create(@Payload() createIncomeDto: CreateIncomeDto) {
-    console.log('createIncomeDto', createIncomeDto);
     return this.incomesService.createIncome(createIncomeDto);
   }
 
@@ -37,12 +37,12 @@ export class IncomesController {
 
   @MessagePattern('get_weekly_sales')
   getWeeklySales(@Payload() entrepreneurId: string) {
+    console.log('entrepreneurId', entrepreneurId);
     return this.incomesService.getWeeklySales(entrepreneurId);
   }
 
   @MessagePattern('create_sale_by_product')
-  //TODO: Coordinar conexion con pago (Jackson)
-  createSaleByProduct(@Payload() createIncomeDto: CreateIncomeDto) {
-    return this.incomesService.createSaleByProduct(createIncomeDto);
+  createSaleByProduct(@Payload() createSaleDto: { entrepreneurId: string, productId: string, salesDate: string, amount: number }) {
+    return this.incomesService.createSaleByProduct(createSaleDto);
   }
 }
