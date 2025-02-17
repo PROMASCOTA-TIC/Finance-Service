@@ -33,8 +33,8 @@ export class IncomesService implements OnModuleInit {
     }
   }
 
+
   async createIncome(createIncomeDto: CreateIncomeDto) {
-    //TODO: Coordinar conexión con venta para almacenar la comisión que se le cobra al comprador (Jackson)
     const newIncome = { id: UuidV4(), ...createIncomeDto };
     try {
       return await this.incomeModel.create(newIncome);
@@ -99,7 +99,6 @@ export class IncomesService implements OnModuleInit {
   }
 
   async createSaleByProduct(createSaleDto: { entrepreneurId: string, productId: string, salesDate: string, amount: number }) {
-    //TODO: Coordinar conexion con pago (Jackson) VER QUE DATOS RECIBE
     try {
       const response = await axios.get(`${URL_BASE}products/` + createSaleDto.productId);
       const product = response.data;
